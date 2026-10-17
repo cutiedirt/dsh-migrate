@@ -1,6 +1,6 @@
 {
   "name": "dsh-migrate",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Safely migrate DeepSeek Harness (DSH) local state between hosts: sessions, workspace registry, attachments, usage ledger, memory DB. Dry-run first, verified, idempotent, rollback-able.",
   "type": "module",
   "license": "MIT",

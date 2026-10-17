@@ -38,17 +38,18 @@ node bin/dsh-migrate.mjs rollback -c migrate.json     # 按 manifest 还原
 | `workspace` | 对齐 `storages/workspace.json` 的 `sessionIds` / `archivedSessionIds` | ✅ v0.1 |
 | `attachments` | 补齐内容寻址附件对象（`attachments/v1/objects/…`） | ✅ v0.1 |
 | `usage` | 按来源分桶合并用量账本（重跑幂等） | ✅ v0.1 |
-| `memory` | meow-memory 记忆库（SQLite）按 id 并集合并 | v0.2 |
+| `memory` | meow-memory 记忆库（SQLite）按主键并集合并（源只读、目标先备份、自增主键表按内容键去重） | ✅ v0.2 |
 | `preset` | 校验智能体预设是否被新宿主识别（声明行形式） | v0.2 |
 
 ## 已验收（v0.1.0）
 
 | 检查 | 结果 |
 |---|---|
-| `node --test "test/*.test.mjs"` | **9 pass / 0 fail**，连续跑两次结果一致（测试不污染共享夹具） |
+| `node --test "test/*.test.mjs"` | **11 pass / 1 skip**（`/mnt` 拒绝那条在 Windows 上跳过），连续跑两次结果一致（测试不污染共享夹具） |
 | CLI 端到端（夹具） | `plan` → `apply`(dry-run) → `apply --write` → 重跑 **0 变更** → `verify`：`badFrames=0, mismatched=0` |
 | 真实会话日志（只读，改写只发生在临时副本） | 3 份最大样本：**7.16 MB / 2120 帧**、**7.33 MB / 2767 帧**、**5.09 MB / 14478 帧（v0 无版本老日志）** —— 帧数/行数不变、**尾部逐字节一致**、原件 SHA 未变 |
 | 真实 sessions 根只读 `plan` | 171 个 `.zstd`，`unreadable=0` |
+| 真实记忆库合并（两份真库副本） | 11 张表、`+2` 插入 / `~1` 替换；**重跑 0 变更**；`integrity_check=ok`、`missing=0` |
 
 真实数据压测脚本：`node tools/accept-real-logs.mjs <repoDir> <sessionsRoot> [maxFiles]`（只读真实文件）。
 
