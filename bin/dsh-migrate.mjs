@@ -10,6 +10,8 @@
 import { readFileSync, existsSync } from 'node:fs'
 import { resolve, dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { zstdDecompressSync, zstdCompressSync } from 'node:zlib'
+import { DatabaseSync } from 'node:sqlite'
 import { loadConfig, sectionOf, KNOWN_STEPS } from '../lib/config.mjs'
 import { loadStep, STEPS } from '../lib/steps/index.mjs'
 import { createManifest, saveManifest, loadManifest, rollback } from '../lib/manifest.mjs'
@@ -37,22 +39,19 @@ function parseArgs(argv) {
 function doctor(cfg, log) {
   const checks = []
   const push = (ok, name, detail) => { checks.push({ ok, name, detail }); log[ok ? 'info' : 'warn'](`${ok ? 'OK  ' : 'FAIL'} ${name}${detail ? ' — ' + detail : ''}`) }
-  push(Number(process.versions.node.split('.')[0]) >= 22 && Number(process.versions.node.split('.')[1]) >= 13,
-    'node >= 22.13', process.versions.node)
-  let zstd = false
-  try { const z = require('node:zlib'); zstd = typeof z.zstdDecompressSync === 'function' } catch {}
-  push(zstd, 'node:zlib zstd', zstd ? 'available' : 'missing')
-  let sqlite = false
-  try { const s = require('node:sqlite'); sqlite = typeof s.DatabaseSync === 'function' } catch {}
-  push(sqlite, 'node:sqlite', sqlite ? 'available' : 'missing')
+  const [major, minor] = process.versions.node.split('.').map(Number)
+  push(major > 22 || (major === 22 && minor >= 13), 'node >= 22.13', process.versions.node)
+  push(typeof zstdDecompressSync === 'function' && typeof zstdCompressSync === 'function',
+    'node:zlib zstd', 'available')
+  push(typeof DatabaseSync === 'function', 'node:sqlite', 'available')
   for (const step of STEPS) {
     const sec = sectionOf(cfg, step)
     if (!sec) { push(true, `step ${step}`, '未配置，将跳过'); continue }
     const paths = []
     if (step === 'sessions') paths.push(sec.root)
-    if (step === 'workspace') paths.push(sec.registry, sec.sessionsRoot).filter(Boolean)
+    if (step === 'workspace') { if (sec.registry) paths.push(sec.registry); if (sec.sessionsRoot) paths.push(sec.sessionsRoot) }
     if (step === 'attachments') paths.push(sec.source, sec.target)
-    if (step === 'usage') paths.push(...(sec.sources ?? []), sec.target)
+    if (step === 'usage') { paths.push(...(sec.sources ?? [])); paths.push(sec.target) }
     if (step === 'memory') paths.push(sec.source, sec.target)
     for (const p of paths.filter(Boolean)) {
       push(existsSync(p), `${step}: ${p}`, existsSync(p) ? '' : '不存在')
