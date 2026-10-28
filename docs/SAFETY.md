@@ -59,6 +59,6 @@ DSH 的内部格式随版本变化（会话 v3/v4、插件契约、预设声明�
 |---|---|
 | `/mnt/d/dshprograming` | `--mnt-d-dshprograming--` |
 | `D:\dshprograming` | `--D-dshprograming--` |
-| `C:\Users\Administrator\Documents\deepseek-harness\default-workspace` | `--C-Users-Administrator-Documents-deepseek-harness-default-workspace--` |
+| `C:\Users\demo\Documents\deepseek-harness\default-workspace` | `--C-Users-demo-Documents-deepseek-harness-default-workspace--` |
 
 注意：`/mnt/d/dshprograming` 与 `D:\dshprograming` 是**两个不同字符串**，互不相等。

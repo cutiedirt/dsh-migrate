@@ -3,3 +3,7 @@ test/fixtures/
 *.log
 run/
 .DS_Store
+
+# 凭据文件（防御性）
+.env
+.env.*

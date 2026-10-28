@@ -15,8 +15,8 @@ test('projectKey: 与 DSH 实证一致', () => {
   assert.equal(projectKey('D:\\dshprograming'), '--D-dshprograming--')
   assert.equal(projectKey('/mnt/d/dshprograming'), '--mnt-d-dshprograming--')
   assert.equal(
-    projectKey('C:\\Users\\Administrator\\Documents\\deepseek-harness\\default-workspace'),
-    '--C-Users-Administrator-Documents-deepseek-harness-default-workspace--',
+    projectKey('C:\\Users\\demo\\Documents\\deepseek-harness\\default-workspace'),
+    '--C-Users-demo-Documents-deepseek-harness-default-workspace--',
   )
   // 两个不同字符串必须不相等
   assert.notEqual(projectKey('D:\\dshprograming'), projectKey('/mnt/d/dshprograming'))
